@@ -1,0 +1,17 @@
+//Test penggunaan relay & led builtin
+
+int relay=14; //D5
+
+void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
+  pinMode(relay, OUTPUT);         //initialize the relay pin as output
+}
+// the loop function runs over and over again forever
+void loop() {
+  digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
+  digitalWrite(relay,LOW); //turn the relay on when logic is LOW
+  delay(1000);                      // Wait for a second
+  digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
+  digitalWrite(relay,HIGH);  //turn the relay off when logic is LOW
+  delay(2000);                      // Wait for two seconds (waiting two seconds to runs again
+}
