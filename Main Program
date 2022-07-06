@@ -1,30 +1,30 @@
-#include <ESP8266WiFi.h>
-
-const char* ssid = "GIYANTA";
-const char* password = "123asdqwe";
-
-void setup() 
-{
-  Serial.begin(115200); 
-  delay(1000);
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.print(ssid);
-//  connecting wifi
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid,password);
-
-  while(WiFi.status()!=WL_CONNECTED){
-    delay(500);
-    Serial.print(".");
-  }
-//  print status saat terkoneksi
- Serial.println(" ");
- Serial.println("WIFI CONNECTED");
- Serial.print("IP Address : ");
- Serial.println(WiFi.localIP());
+#include <LiquidCrystal_I2C.h>
+#include <SoftwareSerial.h>
+SoftwareSerial komunikasi(14,12); //RX dan TX
+LiquidCrystal_I2C lcd(0x27, 16, 2); //menggunakan LCD 16x2
+//variabel state
+int state = 0;
+void setup() {
+  Serial.begin(9600);
+  komunikasi.begin(9600);
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(1, 0);
+  lcd.print("LIGHT MOVEMENT");
+  lcd.setCursor(6, 1);
+  lcd.print("JAR");
+  delay(3000);
+  lcd.clear();
 }
-void loop()
- {
-   
- }
+void loop() {
+  if(komunikasi.available() > 0){
+    state=komunikasi.read();
+     lcd.setCursor(1, 0);
+     lcd.print("Pembacaan Data");
+     lcd.setCursor(6, 1);
+     lcd.print(state);
+     Serial.println(state);
+  }
+  delay(500);
+  lcd.clear();
+}
