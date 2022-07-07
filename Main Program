@@ -1,18 +1,23 @@
 #include <SoftwareSerial.h>
-SoftwareSerial dataRelay(D1,D2);//RX TX
-//variabel
-String data;
-char c;
+SoftwareSerial dataRelay(D2,D1);
 void setup() {
   Serial.begin(9600);
   dataRelay.begin(9600);
 }
 void loop() {
-  if (dataRelay.available() > 0){
-    data = dataRelay.read();
-    Serial.println("Terima Data = "+data);
-    if (data == "3"){
-      Serial.println("relay aktif");
-    }
-  }
+  Serial.print(1);
+  dataRelay.print(1);
+  delay(2000);
+  Serial.print(2);
+  dataRelay.print(2);
+  delay(2000);
+  Serial.print(3);  
+  dataRelay.print(3);
+  delay(2000);
+  Serial.print(4);  
+  dataRelay.print(4);
+  delay(2000);
+  Serial.println(5);  
+  dataRelay.println(5);
+  delay(2000);
 }
