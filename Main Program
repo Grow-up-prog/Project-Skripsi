@@ -1,23 +1,51 @@
-#include <SoftwareSerial.h>
-SoftwareSerial dataRelay(D2,D1);
+//relay
+int relay1 = 7;
+int relay2 = 6;
+int relay3 = 5;
+int relay4 = 4;
+int relay5 = 3;
+//sensor
+int proximity1 = 8;
+int proximity2 = 9;
+int proximity3 = 10;
+int proximity4 = 11;
+int proximity5 = 12;
+int hasil1, hasil2, hasil3, hasil4, hasil5;
 void setup() {
   Serial.begin(9600);
-  dataRelay.begin(9600);
+  pinMode(proximity1, INPUT);
+  pinMode(proximity2, INPUT);
+  pinMode(proximity3, INPUT);
+  pinMode(proximity4, INPUT);
+  pinMode(proximity5, INPUT);
+//insisiasi relay
+  pinMode(relay1, OUTPUT);
+  pinMode(relay2, OUTPUT);
+  pinMode(relay3, OUTPUT);
+  pinMode(relay4, OUTPUT);
+  pinMode(relay5, OUTPUT);
 }
 void loop() {
-  Serial.print(1);
-  dataRelay.print(1);
-  delay(2000);
-  Serial.print(2);
-  dataRelay.print(2);
-  delay(2000);
-  Serial.print(3);  
-  dataRelay.print(3);
-  delay(2000);
-  Serial.print(4);  
-  dataRelay.print(4);
-  delay(2000);
-  Serial.println(5);  
-  dataRelay.println(5);
-  delay(2000);
+  hasil1 = digitalRead(proximity1);
+  hasil2 = digitalRead(proximity2);
+  hasil3 = digitalRead(proximity3);
+  hasil4 = digitalRead(proximity4);
+  hasil5 = digitalRead(proximity5);
+  if (hasil1 == LOW) {
+    Serial.println("sensor 1 ada halangan");
+    progRelay3();
+  } else if (hasil2 == LOW) {
+    Serial.println("sensor 2 ada halangan");
+    progRelay2();
+  } else if (hasil3 == LOW) {
+    Serial.println("sensor 3 ada halangan");
+    progRelay1();
+  } else if (hasil4 == LOW) {
+    Serial.println("sensor 4 ada halangan");
+    progRelay4();
+  } else if (hasil5 == LOW) {
+    Serial.println("sensor 5 ada halangan");
+    progRelay5();
+  }
+  delay(200);
 }
