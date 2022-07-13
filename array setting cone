@@ -1,25 +1,152 @@
-int state=0;
-int flag = 0;
-int const nilai=5;
-int setting[nilai];
+//relay
+int relay1 = 3;
+int relay2 = 4;
+int relay3 = 5;
+int relay4 = 6;
+int relay5 = 7;
+//sensor
+int proximity1 = 8;
+int proximity2 = 9;
+int proximity3 = 10;
+int proximity4 = 11;
+int proximity5 = 12;
+int hasil1, hasil2, hasil3, hasil4, hasil5;
+//state break
+int break1=0;int break2=0;
+int break3=0;int break4=0;
+int break5=0;
+//array
+byte total = 5;
+int urutan[] = {1, 3, 5, 2, 4};
 void setup() {
-  Serial1.begin(9600);
   Serial.begin(9600);
+  pinMode(proximity1, INPUT);
+  pinMode(proximity2, INPUT);
+  pinMode(proximity3, INPUT);
+  pinMode(proximity4, INPUT);
+  pinMode(proximity5, INPUT);
+  //insisiasi relay
+  pinMode(relay1, OUTPUT);
+  pinMode(relay2, OUTPUT);
+  pinMode(relay3, OUTPUT);
+  pinMode(relay4, OUTPUT);
+  pinMode(relay5, OUTPUT);
 }
 void loop() {
-  if(Serial1.available()){
-    state = Serial1.read();
-    setting[flag]=state;
-    if(state==7){
-      flag=-1;
+  for (int i = 0; i < 5; i++) {
+  switch(urutan[i])
+     Serial.println(urutan[i]);
+     if(urutan[i]==1){
+      break5=0;
+      state1();
+     } else if(urutan[i]==2){
+      break1=0;
+      state2();
+     } else if(urutan[i]==3){
+      break2=0;
+      state3();
+     } else if(urutan[i]==4){
+      break3=0;
+      state4();
+     } else if(urutan[i]==5){
+      break4=0;
+      state5();
+     }
+     delay(500);
+  }
+  Serial.println("");
+}
+
+
+
+
+//======================================================
+void progRelay1() {
+  digitalWrite(relay1, HIGH);
+  digitalWrite(relay2, LOW);
+  digitalWrite(relay3, LOW);
+  digitalWrite(relay4, LOW);
+  digitalWrite(relay5, LOW);
+}
+void progRelay2() {
+  digitalWrite(relay1, LOW);
+  digitalWrite(relay2, LOW);
+  digitalWrite(relay3, HIGH);
+  digitalWrite(relay4, LOW);
+  digitalWrite(relay5, LOW);
+}
+void progRelay3() {
+  digitalWrite(relay1, LOW);
+  digitalWrite(relay2, HIGH);
+  digitalWrite(relay3, LOW);
+  digitalWrite(relay4, LOW);
+  digitalWrite(relay5, LOW);
+}
+void progRelay4() {
+  digitalWrite(relay1, LOW);
+  digitalWrite(relay2, LOW);
+  digitalWrite(relay3, LOW);
+  digitalWrite(relay4, HIGH);
+  digitalWrite(relay5, LOW);
+}
+void progRelay5() {
+  digitalWrite(relay1, LOW);
+  digitalWrite(relay2, LOW);
+  digitalWrite(relay3, LOW);
+  digitalWrite(relay4, LOW);
+  digitalWrite(relay5, HIGH);
+}
+void progRelayOFF() {
+  digitalWrite(relay1, LOW);
+  digitalWrite(relay2, LOW);
+  digitalWrite(relay3, LOW);
+  digitalWrite(relay4, LOW);
+  digitalWrite(relay5, LOW);
+}
+
+void  state1() {
+  while (break1 < 1) {
+    progRelay1();
+    if(digitalRead(proximity1)==LOW){
+      progRelayOFF();
+      break1=1;
     }
-    flag++;
-    delay(200);
-    if(flag==5){
-      for(int i=0;i<5;i++){
-        Serial.println(setting[i]);
-      }
-    flag=0;
+  }
+}
+
+void state2() {
+  while (break2 < 1) {
+    progRelay2();
+    if(digitalRead(proximity2)==LOW){
+      progRelayOFF();
+      break2=1;
+    }
+  }
+}
+void state3() {
+  while (break3< 1) {
+    progRelay3();
+    if(digitalRead(proximity3)==LOW){
+      progRelayOFF();
+      break3=1;
+    }
+  }
+}
+void state4() {
+  while (break4 < 1) {
+    progRelay4();
+    if(digitalRead(proximity4)==LOW){
+      progRelayOFF();
+      break4=1;
+    }
+  }
+}
+void state5() {
+  while (break5 < 1) {
+    progRelay5();
+    if(digitalRead(proximity5)==LOW){
+      progRelayOFF();
+      break5=1;
     }
   }
 }
