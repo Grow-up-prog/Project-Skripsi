@@ -1,51 +1,87 @@
-//relay
-int relay1 = 7;
-int relay2 = 6;
-int relay3 = 5;
-int relay4 = 4;
-int relay5 = 3;
+int state = 0; //detect sensor stopwatch
+int flag = 0;
+int const nilai = 5; //total nilai index
+int setting[nilai];
+//stopwatch
+//variabel nilai millis
+long millisSebelum;
+int milidetik, detik, menit, jam;
+//debounce
+int currentState1 = HIGH;
+int lastState1 = HIGH;
 //sensor
-int proximity1 = 8;
-int proximity2 = 9;
-int proximity3 = 10;
-int proximity4 = 11;
-int proximity5 = 12;
-int hasil1, hasil2, hasil3, hasil4, hasil5;
+int irSensor = 13;
+int kondisi = 0;
+int bendera = 0;
 void setup() {
+  Serial1.begin(9600);
   Serial.begin(9600);
-  pinMode(proximity1, INPUT);
-  pinMode(proximity2, INPUT);
-  pinMode(proximity3, INPUT);
-  pinMode(proximity4, INPUT);
-  pinMode(proximity5, INPUT);
-//insisiasi relay
-  pinMode(relay1, OUTPUT);
-  pinMode(relay2, OUTPUT);
-  pinMode(relay3, OUTPUT);
-  pinMode(relay4, OUTPUT);
-  pinMode(relay5, OUTPUT);
+  pinMode(irSensor, INPUT);
 }
 void loop() {
-  hasil1 = digitalRead(proximity1);
-  hasil2 = digitalRead(proximity2);
-  hasil3 = digitalRead(proximity3);
-  hasil4 = digitalRead(proximity4);
-  hasil5 = digitalRead(proximity5);
-  if (hasil1 == LOW) {
-    Serial.println("sensor 1 ada halangan");
-    progRelay3();
-  } else if (hasil2 == LOW) {
-    Serial.println("sensor 2 ada halangan");
-    progRelay2();
-  } else if (hasil3 == LOW) {
-    Serial.println("sensor 3 ada halangan");
-    progRelay1();
-  } else if (hasil4 == LOW) {
-    Serial.println("sensor 4 ada halangan");
-    progRelay4();
-  } else if (hasil5 == LOW) {
-    Serial.println("sensor 5 ada halangan");
-    progRelay5();
+  stopWatch(); //program sensoring stopwatch
+  if (Serial1.available()) {
+    state = Serial1.read();
+    setting[flag] = state;
+    if (state == 7) { 
+      flag = -1;
+    }
+    flag++;
+    delay(200);
+    if (flag == 5) {
+      for (int i = 0; i < 5; i++) {
+        Serial.println(setting[i]);
+      }
+      Serial1.print(00);
+      Serial1.print("-");
+      Serial1.print(00);
+      Serial1.print("-");
+      Serial1.print(00);
+      Serial1.println("-");
+      flag = 0;
+    }
   }
-  delay(200);
+}
+
+
+
+//====================
+void stopWatch() {
+  currentState1 = digitalRead(irSensor);
+  if (lastState1 == HIGH && currentState1 == LOW) {
+    bendera++;
+  }
+  lastState1 = currentState1;
+  if (bendera == 1) {
+    if (millis() >= millisSebelum + 100) {
+      milidetik++;
+      if (milidetik >= 10) {
+        milidetik = 0;
+        detik++;
+
+        if (detik >= 60) {
+          detik = 0;
+          menit++;
+        }
+      }
+      Serial1.print(menit);
+      Serial1.print("-");
+      Serial1.print(detik);
+      Serial1.print("-");
+      Serial1.print(milidetik);
+      Serial1.print("-");
+      millisSebelum = millis();
+    }
+  } else if (flag == 2) {
+    Serial1.print(menit);
+    Serial1.print("-");
+    Serial1.print(detik);
+    Serial1.print("-");
+    Serial1.print(milidetik);
+    Serial1.print("-");
+    millisSebelum = millis();
+    bendera = 0;
+  }
+//    delay(2000);
+  }
 }
