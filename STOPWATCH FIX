@@ -1,0 +1,76 @@
+int state = 0; //detect sensor stopwatch
+//variabel nilai millis
+long millisSebelum;
+int milidetik, detik, menit, jam;
+//debounce
+int currentState1 = HIGH;
+int lastState1 = HIGH;
+//sensor
+int irSensor = 13;
+int kondisi = 0;
+int bendera = 0;
+void setup() {
+  Serial1.begin(9600);
+  Serial.begin(9600);
+  pinMode(irSensor, INPUT);
+}
+void loop() {
+  stopWatch(); //program sensoring stopwatch
+  if (Serial1.available()) {
+    state = Serial1.read();
+    if (state == 7) {
+      milidetik=0;
+      detik=0;
+      menit=0;
+      Serial1.print(menit);
+      Serial1.print("-");
+      Serial1.print(detik);
+      Serial1.print("-");
+      Serial1.print(milidetik);
+      Serial1.println("-");
+    }
+    delay(200);
+  }
+}
+
+
+//====================
+void stopWatch() {
+  currentState1 = digitalRead(irSensor);
+  if (lastState1 == HIGH && currentState1 == LOW) {
+    bendera++;
+  }
+  lastState1 = currentState1;
+  if (bendera == 1) {
+    if (millis() >= millisSebelum + 100) {
+      milidetik++;
+      if (milidetik >= 10) {
+        milidetik = 0;
+        detik++;
+
+        if (detik >= 60) {
+          detik = 0;
+          menit++;
+        }
+      }
+      Serial1.print(menit);
+      Serial1.print("-");
+      Serial1.print(detik);
+      Serial1.print("-");
+      Serial1.print(milidetik);
+      Serial1.print("-");
+      millisSebelum = millis();
+    }
+  } else if (bendera == 2) {
+    Serial1.print(menit);
+    Serial1.print("-");
+    Serial1.print(detik);
+    Serial1.print("-");
+    Serial1.print(milidetik);
+    Serial1.print("-");
+    millisSebelum = millis();
+    delay(5000);
+    bendera = 0;
+  }
+  //    delay(2000);
+}
