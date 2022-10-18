@@ -1,0 +1,39 @@
+int coneI1 = 7; //merah
+int coneO1 = 6; //coklat
+int coneI2 = 5; //hitam
+int coneO2 = 4; //putih
+//== == == == == == =
+int coneI3 = 3; //abu abu
+int coneO3 = 12; //ungu
+int coneI4 = 11; //biru
+int coneO4 = 10; // hijau
+//== == == == == == =
+int coneI5 = 9; //kuning
+int coneO5 = 8; //oranye
+void setup() {
+  pinMode(coneI1, INPUT);
+  pinMode(coneO1, OUTPUT);
+  pinMode(coneI2, INPUT);
+  pinMode(coneO2, OUTPUT);
+  //  == == == == == == == == == == == =
+  pinMode(coneI3, INPUT);
+  pinMode(coneO3, OUTPUT);
+  pinMode(coneI4, INPUT);
+  pinMode(coneO4, OUTPUT);
+  //  == == == == == == == == == == == =
+  pinMode(coneI5, INPUT);
+  pinMode(coneO5, OUTPUT);
+}
+
+void loop() {
+  //  analogWrite(coneI1, 255);
+  digitalWrite(coneO1, HIGH);
+  //  analogWrite(coneI2, 155);
+  digitalWrite(coneO2, HIGH);
+  //  analogWrite(coneI3, 255);
+  digitalWrite(coneO3, HIGH);
+  //  analogWrite(coneI4, 155);
+  digitalWrite(coneO4, HIGH);
+  //  analogWrite(coneI5, 255);
+  digitalWrite(coneO5, HIGH);
+}
