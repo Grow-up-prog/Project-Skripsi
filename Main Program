@@ -1,50 +1,107 @@
 int state = 0; //detect sensor stopwatch
-int flag = 0;
-int const nilai = 5; //total nilai index
-int setting[nilai];
-//stopwatch
 //variabel nilai millis
 long millisSebelum;
 int milidetik, detik, menit, jam;
 //debounce
 int currentState1 = HIGH;
 int lastState1 = HIGH;
-//sensor
+//sensor stopwatch
 int irSensor = 13;
-int kondisi = 0;
-int bendera = 0;
+int bendera = 0; //bendera for stopwatch debounce
+
+//BREAK MOVEMENT CONE
+int break1 = 0; int break2 = 0; int break3 = 0; int break4 = 0; int break5 = 0;
+
+//komunikasi
+int flag = 0;
+int urutan [10];
+
+//===PENDEFINISIAN PIN IO====
+
+int coneI1 = 3; //merah
+int coneO1 = 4; //coklat
+int coneI2 = 5; //hitam
+int coneO2 = 6; //putih
+//== == == == == == =
+int coneI3 = 7; //abu abu
+int coneO3 = 8; //ungu
+int coneI4 = 9; //biru
+int coneO4 = 10; // hijau
+//== == == == == == =
+int coneI5 = 11; //kuning
+int coneO5 = 12; //oranye
+
+//==================
+
 void setup() {
+  //====PinMode====
+  pinMode(coneI1, INPUT);
+  pinMode(coneO1, OUTPUT);
+  pinMode(coneI2, INPUT);
+  pinMode(coneO2, OUTPUT);
+  //  == == == == == == == == == == == =
+  pinMode(coneI3, INPUT);
+  pinMode(coneO3, OUTPUT);
+  pinMode(coneI4, INPUT);
+  pinMode(coneO4, OUTPUT);
+  //  == == == == == == == == == == == =
+  pinMode(coneI5, INPUT);
+  pinMode(coneO5, OUTPUT);
+  //===END_PinMode===
   Serial1.begin(9600);
   Serial.begin(9600);
   pinMode(irSensor, INPUT);
 }
 void loop() {
-  stopWatch(); //program sensoring stopwatch
-  if (Serial1.available()) {
-    state = Serial1.read();
-    setting[flag] = state;
-    if (state == 7) { 
-      flag = -1;
-    }
-    flag++;
-    delay(200);
-    if (flag == 5) {
-      for (int i = 0; i < 5; i++) {
-        Serial.println(setting[i]);
-      }
-      Serial1.print(00);
-      Serial1.print("-");
-      Serial1.print(00);
-      Serial1.print("-");
-      Serial1.print(00);
-      Serial1.println("-");
-      flag = 0;
-    }
-  }
+  coneOn();
+  delay(1000);
+  coneOff();
+  delay(1000);
 }
-
-
-
+  /*
+    stopWatch(); //program sensoring stopwatch
+    if (Serial1.available()) {
+      state = Serial1.read();
+      urutan[flag] = state;
+      if (state == 7) {
+        Serial.println("reset");
+        flag = -1;
+        milidetik = 0;
+        detik = 0;
+        menit = 0;
+        Serial1.print(menit);
+        Serial1.print("-");
+        Serial1.print(detik);
+        Serial1.print("-");
+        Serial1.print(milidetik);
+        Serial1.println("-");
+      }
+      flag++;//penambahan flag
+      delay(200);
+      if (flag == 10 || state == 8) {
+        for (int i = 0; i < flag; i++) {
+          Serial.println(urutan[i]);
+          if (urutan[i] == 1) {
+            break1 = 0;
+            state1();
+          } else if (urutan[i] == 2) {
+            break2 = 0;
+            state2();
+          } else if (urutan[i] == 3) {
+            break3 = 0;
+            state3();
+          } else if (urutan[i] == 4) {
+            break4 = 0;
+            state4();
+          } else if (urutan[i] == 5) {
+            break5 = 0;
+            state5();
+            delay(500);
+          }
+        }
+      }
+    }
+  */
 //====================
 void stopWatch() {
   currentState1 = digitalRead(irSensor);
@@ -72,7 +129,7 @@ void stopWatch() {
       Serial1.print("-");
       millisSebelum = millis();
     }
-  } else if (flag == 2) {
+  } else if (bendera == 2) {
     Serial1.print(menit);
     Serial1.print("-");
     Serial1.print(detik);
@@ -80,8 +137,112 @@ void stopWatch() {
     Serial1.print(milidetik);
     Serial1.print("-");
     millisSebelum = millis();
+    delay(5000);
     bendera = 0;
   }
-//    delay(2000);
+}
+
+
+
+
+//= == == == == == == == == == == == == == == == == == == == == == == == == == == =
+void coneOne() {
+  digitalWrite(coneO1, HIGH);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, LOW);
+}
+void coneTwo() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, HIGH);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, LOW);
+}
+void coneThree() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, HIGH);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, LOW);
+}
+void coneFour() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, HIGH);
+  digitalWrite(coneO5, LOW);
+}
+void coneFive() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, HIGH);
+}
+
+void coneOff() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, LOW);
+}
+void coneOn() {
+  digitalWrite(coneO1, HIGH);
+  digitalWrite(coneO2, HIGH);
+  digitalWrite(coneO3, HIGH);
+  digitalWrite(coneO4, HIGH);
+  digitalWrite(coneO5, HIGH);
+}
+
+void  state1() {
+  while (break1 < 1) {
+    coneOne();
+    if (digitalRead(coneI1) == LOW) {
+      coneOff();
+      break1 = 1;
+    }
+  }
+}
+
+void state2() {
+  while (break2 < 1) {
+    coneTwo();
+    if (digitalRead(coneI2) == LOW) {
+      coneOff();
+      break2 = 1;
+    }
+  }
+}
+
+void state3() {
+  while (break3 < 1) {
+    coneThree();
+    if (digitalRead(coneI3) == LOW) {
+      coneOff();
+      break3 = 1;
+    }
+  }
+}
+
+void state4() {
+  while (break4 < 1) {
+    coneFour();
+    if (digitalRead(coneI4) == LOW) {
+      coneOff();
+      break4 = 1;
+    }
+  }
+}
+
+void state5() {
+  while (break5 < 1) {
+    coneFive();
+    if (digitalRead(coneI5) == LOW) {
+      coneOff();
+      break5 = 1;
+    }
   }
 }
