@@ -53,12 +53,6 @@ void setup() {
   pinMode(irSensor, INPUT);
 }
 void loop() {
-  coneOn();
-  delay(1000);
-  coneOff();
-  delay(1000);
-}
-  /*
     stopWatch(); //program sensoring stopwatch
     if (Serial1.available()) {
       state = Serial1.read();
@@ -101,7 +95,7 @@ void loop() {
         }
       }
     }
-  */
+}
 //====================
 void stopWatch() {
   currentState1 = digitalRead(irSensor);
@@ -141,7 +135,6 @@ void stopWatch() {
     bendera = 0;
   }
 }
-
 
 
 
