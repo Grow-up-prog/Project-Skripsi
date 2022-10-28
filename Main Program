@@ -1,20 +1,18 @@
-int state = 0; //detect sensor stopwatch
-//variabel nilai millis
-long millisSebelum;
-int milidetik, detik, menit, jam;
-//debounce
-int currentState1 = HIGH;
-int lastState1 = HIGH;
-//sensor stopwatch
-int irSensor = 13;
-int bendera = 0; //bendera for stopwatch debounce
 
-//BREAK MOVEMENT CONE
-int break1 = 0; int break2 = 0; int break3 = 0; int break4 = 0; int break5 = 0;
-
-//komunikasi
-int flag = 0;
-int urutan [10];
+#include <LiquidCrystal_I2C.h>
+#include <Arduino_FreeRTOS.h> //library Free Real Time Operation System
+/*
+  prototipe adalah sebuah fungsi tanpa isi karena memang hanya sebuah deklarasi saja.
+  manfaat dari prototipe fungsi, pertama kita tahu bahwa setiap fungsi dalam bahasa C harus didefinisikan
+  sebelum digunakan. Jadi jika sebuah fungsi akan dipakai dalam rutin utama main()
+*/
+//maka fungsi tersebut harus didefinisikan diatas fungsi main()
+void TaskStopwatch(void*pvParameters); //prototipe fungsi stopwatch
+void TaskLightMovement(void*pvParameters); //prototipe fungsi blink1
+//void TaskBlink3(void*pvParameters); //prototipe fungsi blink2
+//void Taskprint(void*pvParameters);  //prototipe fungsi print text
+//void Taskpotensio(void*pvParameters); //prototipe fungsi analogRead pada A0
+//void Taskpotensio(void*pvParameters); //prototipe fungsi analogRead pada A0
 
 //===PENDEFINISIAN PIN IO====
 
@@ -22,220 +20,139 @@ int coneI1 = 3; //merah
 int coneO1 = 4; //coklat
 int coneI2 = 5; //hitam
 int coneO2 = 6; //putih
-//== == == == == == =
-int coneI3 = 7; //abu abu
-int coneO3 = 8; //ungu
-int coneI4 = 9; //biru
-int coneO4 = 10; // hijau
-//== == == == == == =
-int coneI5 = 11; //kuning
-int coneO5 = 12; //oranye
 
-//==================
+//sensor stopwatch
+int irSensor = 13;
+int bendera = 0; //bendera for stopwatch debounce
+//debounce
+int currentState1 = HIGH;
+int lastState1 = HIGH;
+
 
 void setup() {
+  //=============================
+  Serial.begin(9600);
+  //xTaskCreate(TaskFunction_t pvTaskCode, const char * const pcName, uint16_t uStackDepth, void*pvParameters, UBaseType_t uxPriority, TaskHandle*pxCreatedTask)
+  //pembuatan task, dengan argument (memanggil fungsi, "nama dari task", 128, NULL, number priority, NULL)
+  xTaskCreate(TaskStopwatch, "Task Stopwatch", 128, NULL, 1, NULL);
+  xTaskCreate(TaskLightMovement, "Task LightMovement", 128, NULL, 1, NULL);
+  /* xTaskCreate(TaskBlink3, "Task3", 128, NULL, 1, NULL);
+    xTaskCreate(Taskprint, "Task4", 128, NULL, 1, NULL);
+    xTaskCreate(Taskpotensio, "task5", 128, NULL, 1, NULL);
+  */
+  vTaskStartScheduler();
+}
+void loop()
+{}
+/*
+   perbedaan while(1) dan while(0) di C atau C++, apabila statemen dalam sebuah while
+   masih benar maka isi dari sebuah fungsi while akan melakukan eksekusi kembali
+   while(1) atau while selain nilai 0 maka digunakan untuk infinite loop.
+   tidak ada syarat untuk while, karena 1 atau nilai bukan nol ada, maka kondisinya selalu benar
+*/
+//===========================================
+
+/*
+   vTaskDelay(waktu dalam milisecond/portTICK_PERIOD_MS)
+   portTICK_PERIOD_MS berfunsi sebagai nilai pembagi dalam fungsi vTaskDelay, agar menjadi realtime
+*/
+
+void TaskStopwatch(void*pvParameters)//membuat fungsi void untuk stopwatch
+{
+  pinMode(irSensor, INPUT);
+  while (1)
+  {
+    currentState1 = digitalRead(irSensor);
+    if (lastState1 == HIGH && currentState1 == LOW) {
+      bendera++;
+    }
+    lastState1 = currentState1;
+    if (bendera == 1) {
+      if (millis() >= millisSebelum + 100) {
+        milidetik++;
+        if (milidetik >= 10) {
+          milidetik = 0;
+          detik++;
+
+          if (detik >= 60) {
+            detik = 0;
+            menit++;
+          }
+        }
+        Serial.print(menit);
+        Serial.print("-");
+        Serial.print(detik);
+        Serial.print("-");
+        Serial.print(milidetik);
+        Serial.print("-");
+        millisSebelum = millis();
+      }
+    } else if (bendera == 2) {
+      Serial.print(menit);
+      Serial.print("-");
+      Serial.print(detik);
+      Serial.print("-");
+      Serial.print(milidetik);
+      Serial.print("-");
+      millisSebelum = millis();
+      vTaskDelay(5000 / portTICK_PERIOD_MS);
+      bendera = 0;
+    }
+  }
+}
+
+void TaskBlink1(void*pvParameters)
+{
   //====PinMode====
   pinMode(coneI1, INPUT);
   pinMode(coneO1, OUTPUT);
   pinMode(coneI2, INPUT);
   pinMode(coneO2, OUTPUT);
-  //  == == == == == == == == == == == =
-  pinMode(coneI3, INPUT);
-  pinMode(coneO3, OUTPUT);
-  pinMode(coneI4, INPUT);
-  pinMode(coneO4, OUTPUT);
-  //  == == == == == == == == == == == =
-  pinMode(coneI5, INPUT);
-  pinMode(coneO5, OUTPUT);
-  //===END_PinMode===
-  Serial1.begin(9600);
-  Serial.begin(9600);
-  pinMode(irSensor, INPUT);
-}
-void loop() {
-    stopWatch(); //program sensoring stopwatch
-    if (Serial1.available()) {
-      state = Serial1.read();
-      urutan[flag] = state;
-      if (state == 7) {
-        Serial.println("reset");
-        flag = -1;
-        milidetik = 0;
-        detik = 0;
-        menit = 0;
-        Serial1.print(menit);
-        Serial1.print("-");
-        Serial1.print(detik);
-        Serial1.print("-");
-        Serial1.print(milidetik);
-        Serial1.println("-");
-      }
-      flag++;//penambahan flag
-      delay(200);
-      if (flag == 10 || state == 8) {
-        for (int i = 0; i < flag; i++) {
-          Serial.println(urutan[i]);
-          if (urutan[i] == 1) {
-            break1 = 0;
-            state1();
-          } else if (urutan[i] == 2) {
-            break2 = 0;
-            state2();
-          } else if (urutan[i] == 3) {
-            break3 = 0;
-            state3();
-          } else if (urutan[i] == 4) {
-            break4 = 0;
-            state4();
-          } else if (urutan[i] == 5) {
-            break5 = 0;
-            state5();
-            delay(500);
-          }
-        }
-      }
-    }
-}
-//====================
-void stopWatch() {
-  currentState1 = digitalRead(irSensor);
-  if (lastState1 == HIGH && currentState1 == LOW) {
-    bendera++;
-  }
-  lastState1 = currentState1;
-  if (bendera == 1) {
-    if (millis() >= millisSebelum + 100) {
-      milidetik++;
-      if (milidetik >= 10) {
-        milidetik = 0;
-        detik++;
-
-        if (detik >= 60) {
-          detik = 0;
-          menit++;
-        }
-      }
-      Serial1.print(menit);
-      Serial1.print("-");
-      Serial1.print(detik);
-      Serial1.print("-");
-      Serial1.print(milidetik);
-      Serial1.print("-");
-      millisSebelum = millis();
-    }
-  } else if (bendera == 2) {
-    Serial1.print(menit);
-    Serial1.print("-");
-    Serial1.print(detik);
-    Serial1.print("-");
-    Serial1.print(milidetik);
-    Serial1.print("-");
-    millisSebelum = millis();
-    delay(5000);
-    bendera = 0;
+  while (1)
+  {
+    digitalWrite(coneO1, HIGH);
+    digitalWrite(coneO2, HIGH);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    digitalWrite(coneO1, LOW);
+    digitalWrite(coneO2, LOW);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
-
-
-
-//= == == == == == == == == == == == == == == == == == == == == == == == == == == =
-void coneOne() {
-  digitalWrite(coneO1, HIGH);
-  digitalWrite(coneO2, LOW);
-  digitalWrite(coneO3, LOW);
-  digitalWrite(coneO4, LOW);
-  digitalWrite(coneO5, LOW);
-}
-void coneTwo() {
-  digitalWrite(coneO1, LOW);
-  digitalWrite(coneO2, HIGH);
-  digitalWrite(coneO3, LOW);
-  digitalWrite(coneO4, LOW);
-  digitalWrite(coneO5, LOW);
-}
-void coneThree() {
-  digitalWrite(coneO1, LOW);
-  digitalWrite(coneO2, LOW);
-  digitalWrite(coneO3, HIGH);
-  digitalWrite(coneO4, LOW);
-  digitalWrite(coneO5, LOW);
-}
-void coneFour() {
-  digitalWrite(coneO1, LOW);
-  digitalWrite(coneO2, LOW);
-  digitalWrite(coneO3, LOW);
-  digitalWrite(coneO4, HIGH);
-  digitalWrite(coneO5, LOW);
-}
-void coneFive() {
-  digitalWrite(coneO1, LOW);
-  digitalWrite(coneO2, LOW);
-  digitalWrite(coneO3, LOW);
-  digitalWrite(coneO4, LOW);
-  digitalWrite(coneO5, HIGH);
-}
-
-void coneOff() {
-  digitalWrite(coneO1, LOW);
-  digitalWrite(coneO2, LOW);
-  digitalWrite(coneO3, LOW);
-  digitalWrite(coneO4, LOW);
-  digitalWrite(coneO5, LOW);
-}
-void coneOn() {
-  digitalWrite(coneO1, HIGH);
-  digitalWrite(coneO2, HIGH);
-  digitalWrite(coneO3, HIGH);
-  digitalWrite(coneO4, HIGH);
-  digitalWrite(coneO5, HIGH);
-}
-
-void  state1() {
-  while (break1 < 1) {
-    coneOne();
-    if (digitalRead(coneI1) == LOW) {
-      coneOff();
-      break1 = 1;
-    }
+/*
+void TaskBlink3(void*pvParameters)
+{
+  pinMode(LED3, OUTPUT); //setiap 1 detik
+  while (1) {
+    digitalWrite(LED3, HIGH);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    digitalWrite(LED3, LOW);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
-
-void state2() {
-  while (break2 < 1) {
-    coneTwo();
-    if (digitalRead(coneI2) == LOW) {
-      coneOff();
-      break2 = 1;
-    }
+void Taskprint(void*pvParameters)
+{
+  int counter = 0;
+  while (1)
+  {
+    counter++;
+    lcd.setCursor(0, 0);
+    lcd.print("counter=");
+    lcd.setCursor(9, 0);
+    lcd.print(counter);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    lcd.clear();
   }
 }
-
-void state3() {
-  while (break3 < 1) {
-    coneThree();
-    if (digitalRead(coneI3) == LOW) {
-      coneOff();
-      break3 = 1;
-    }
+void Taskpotensio(void*pvParameters)
+{
+  pinMode(A1, INPUT);
+  while (1) {
+    int i = map(analogRead(A1), 0, 1023, 0, 100);
+    lcd.setCursor(0, 1);
+    lcd.print("nilai_pot=");
+    lcd.setCursor(10, 1);
+    lcd.print(int(i));
+    vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
-
-void state4() {
-  while (break4 < 1) {
-    coneFour();
-    if (digitalRead(coneI4) == LOW) {
-      coneOff();
-      break4 = 1;
-    }
-  }
-}
-
-void state5() {
-  while (break5 < 1) {
-    coneFive();
-    if (digitalRead(coneI5) == LOW) {
-      coneOff();
-      break5 = 1;
-    }
-  }
-}
+*/
