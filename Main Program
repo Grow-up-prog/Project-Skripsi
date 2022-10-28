@@ -1,40 +1,48 @@
 #include <Arduino_FreeRTOS.h>
 
-//define task handles
-TaskHandle_t TaskBlink_Handler;
-TaskHandle_t TaskSerial_Handler;
+//====STOPWATCH====
+int state = 0; //detect sensor stopwatch
+//variabel nilai millis
+long millisSebelum;
+int milidetik, detik, menit, jam;
+//debounce
+int currentState1 = HIGH;
+int lastState1 = HIGH;
+//sensor stopwatch
+int irSensor = 13;
+int bendera = 0; //bendera for stopwatch debounce
 
-// define two tasks for Blink & Serial
-void TaskBlink( void *pvParameters );
-void TaskSerial(void* pvParameters);
+//define task handles
+TaskHandle_t TaskStopwatch_Handler;
+TaskHandle_t TaskLight_Handler;
+
+// define two tasks for Blink  & Serial
+void TaskStopwatch( void *pvParameters );
+void TaskLight(void* pvParameters);
 
 // the setup function runs once when you press reset or power the board
 void setup() {
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
-  
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB, on LEONARDO, MICRO, YUN, and other 32u4 based boards.
-  }
-  
+  pinMode(irSensor, INPUT);
   // Now set up two tasks to run independently.
-   xTaskCreate(
-    TaskBlink
+  xTaskCreate(
+    TaskStopwatch
     ,  "Blink"   // A name just for humans
     ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
     ,  NULL //Parameters passed to the task function
     ,  2  // Priority, with 2 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-    ,  &TaskBlink_Handler );//Task handle
+    ,  &TaskStopwatch_Handler );//Task handle
 
-   xTaskCreate(
-    TaskSerial
+  xTaskCreate(
+    TaskLight
     ,  "Serial"
     ,  128  // Stack size
     ,  NULL //Parameters passed to the task function
     ,  1  // Priority
-    ,  &TaskSerial_Handler );  //Task handle
+    ,  &TaskLight_Handler );  //Task handle
 }
-    
+
 
 void loop()
 {
@@ -45,37 +53,55 @@ void loop()
 /*---------------------- Tasks ---------------------*/
 /*--------------------------------------------------*/
 
-void TaskSerial(void* pvParameters){
-/*
- Serial
- Send "s" or "r" through the serial port to control the suspend and resume of the LED light task.
- This example code is in the public domain.
-*/
+void TaskLight(void* pvParameters) {
   (void) pvParameters;
-     pinMode(4, OUTPUT);
   for (;;) // A Task shall never return or exit.
   {
-    //Serial.println(11);
-    Serial.println("tugas1");
-    digitalWrite(4, HIGH);   // turn the LED on (HIGH is the voltage level)
-    vTaskDelay( 500 / portTICK_PERIOD_MS ); // wait for one second
-    digitalWrite(4, LOW);    // turn the LED off by making the voltage LOW
-    vTaskDelay( 500 / portTICK_PERIOD_MS ); // wait for one second
+
   }
 }
 
 
-void TaskBlink(void *pvParameters)  // This is a task.
+void TaskStopwatch(void *pvParameters)  // This is a task.
 {
   (void) pvParameters;
-  pinMode(6, OUTPUT);
   for (;;) // A Task shall never return or exit.
   {
-    //Serial.println(11);
-    Serial.println("tugas2");
-    digitalWrite(6, HIGH);   // turn the LED on (HIGH is the voltage level)
-    vTaskDelay( 1000 / portTICK_PERIOD_MS ); // wait for one second
-    digitalWrite(6, LOW);    // turn the LED off by making the voltage LOW
-    vTaskDelay( 1000 / portTICK_PERIOD_MS ); // wait for one second
+      currentState1 = digitalRead(irSensor);
+    if (lastState1 == HIGH && currentState1 == LOW) {
+      bendera++;
+    }
+    lastState1 = currentState1;
+    if (bendera == 1) {
+      if (millis() >= millisSebelum + 100) {
+        milidetik++;
+        if (milidetik >= 10) {
+          milidetik = 0;
+          detik++;
+
+          if (detik >= 60) {
+            detik = 0;
+            menit++;
+          }
+        }
+        Serial.print(menit);
+        Serial.print("-");
+        Serial.print(detik);
+        Serial.print("-");
+        Serial.print(milidetik);
+        Serial.println("-");
+        millisSebelum = millis();
+      }
+    } else if (bendera == 2) {
+      Serial.print(menit);
+      Serial.print("-");
+      Serial.print(detik);
+      Serial.print("-");
+      Serial.print(milidetik);
+      Serial.println("-");
+      millisSebelum = millis();
+      vTaskDelay( 4000 / portTICK_PERIOD_MS ); // wait for one second
+      bendera = 0;
+    }
   }
 }
