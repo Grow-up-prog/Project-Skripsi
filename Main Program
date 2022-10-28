@@ -1,158 +1,81 @@
+#include <Arduino_FreeRTOS.h>
 
-#include <LiquidCrystal_I2C.h>
-#include <Arduino_FreeRTOS.h> //library Free Real Time Operation System
-/*
-  prototipe adalah sebuah fungsi tanpa isi karena memang hanya sebuah deklarasi saja.
-  manfaat dari prototipe fungsi, pertama kita tahu bahwa setiap fungsi dalam bahasa C harus didefinisikan
-  sebelum digunakan. Jadi jika sebuah fungsi akan dipakai dalam rutin utama main()
-*/
-//maka fungsi tersebut harus didefinisikan diatas fungsi main()
-void TaskStopwatch(void*pvParameters); //prototipe fungsi stopwatch
-void TaskLightMovement(void*pvParameters); //prototipe fungsi blink1
-//void TaskBlink3(void*pvParameters); //prototipe fungsi blink2
-//void Taskprint(void*pvParameters);  //prototipe fungsi print text
-//void Taskpotensio(void*pvParameters); //prototipe fungsi analogRead pada A0
-//void Taskpotensio(void*pvParameters); //prototipe fungsi analogRead pada A0
+//define task handles
+TaskHandle_t TaskBlink_Handler;
+TaskHandle_t TaskSerial_Handler;
 
-//===PENDEFINISIAN PIN IO====
+// define two tasks for Blink & Serial
+void TaskBlink( void *pvParameters );
+void TaskSerial(void* pvParameters);
 
-int coneI1 = 3; //merah
-int coneO1 = 4; //coklat
-int coneI2 = 5; //hitam
-int coneO2 = 6; //putih
-
-//sensor stopwatch
-int irSensor = 13;
-int bendera = 0; //bendera for stopwatch debounce
-//debounce
-int currentState1 = HIGH;
-int lastState1 = HIGH;
-
-
+// the setup function runs once when you press reset or power the board
 void setup() {
-  //=============================
+  // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
-  //xTaskCreate(TaskFunction_t pvTaskCode, const char * const pcName, uint16_t uStackDepth, void*pvParameters, UBaseType_t uxPriority, TaskHandle*pxCreatedTask)
-  //pembuatan task, dengan argument (memanggil fungsi, "nama dari task", 128, NULL, number priority, NULL)
-  xTaskCreate(TaskStopwatch, "Task Stopwatch", 128, NULL, 1, NULL);
-  xTaskCreate(TaskLightMovement, "Task LightMovement", 128, NULL, 1, NULL);
-  /* xTaskCreate(TaskBlink3, "Task3", 128, NULL, 1, NULL);
-    xTaskCreate(Taskprint, "Task4", 128, NULL, 1, NULL);
-    xTaskCreate(Taskpotensio, "task5", 128, NULL, 1, NULL);
-  */
-  vTaskStartScheduler();
+  
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB, on LEONARDO, MICRO, YUN, and other 32u4 based boards.
+  }
+  
+  // Now set up two tasks to run independently.
+   xTaskCreate(
+    TaskBlink
+    ,  "Blink"   // A name just for humans
+    ,  128  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  NULL //Parameters passed to the task function
+    ,  2  // Priority, with 2 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  &TaskBlink_Handler );//Task handle
+
+   xTaskCreate(
+    TaskSerial
+    ,  "Serial"
+    ,  128  // Stack size
+    ,  NULL //Parameters passed to the task function
+    ,  1  // Priority
+    ,  &TaskSerial_Handler );  //Task handle
 }
+    
+
 void loop()
-{}
+{
+  // Empty. Things are done in Tasks.
+}
+
+/*--------------------------------------------------*/
+/*---------------------- Tasks ---------------------*/
+/*--------------------------------------------------*/
+
+void TaskSerial(void* pvParameters){
 /*
-   perbedaan while(1) dan while(0) di C atau C++, apabila statemen dalam sebuah while
-   masih benar maka isi dari sebuah fungsi while akan melakukan eksekusi kembali
-   while(1) atau while selain nilai 0 maka digunakan untuk infinite loop.
-   tidak ada syarat untuk while, karena 1 atau nilai bukan nol ada, maka kondisinya selalu benar
+ Serial
+ Send "s" or "r" through the serial port to control the suspend and resume of the LED light task.
+ This example code is in the public domain.
 */
-//===========================================
-
-/*
-   vTaskDelay(waktu dalam milisecond/portTICK_PERIOD_MS)
-   portTICK_PERIOD_MS berfunsi sebagai nilai pembagi dalam fungsi vTaskDelay, agar menjadi realtime
-*/
-
-void TaskStopwatch(void*pvParameters)//membuat fungsi void untuk stopwatch
-{
-  pinMode(irSensor, INPUT);
-  while (1)
+  (void) pvParameters;
+     pinMode(4, OUTPUT);
+  for (;;) // A Task shall never return or exit.
   {
-    currentState1 = digitalRead(irSensor);
-    if (lastState1 == HIGH && currentState1 == LOW) {
-      bendera++;
-    }
-    lastState1 = currentState1;
-    if (bendera == 1) {
-      if (millis() >= millisSebelum + 100) {
-        milidetik++;
-        if (milidetik >= 10) {
-          milidetik = 0;
-          detik++;
-
-          if (detik >= 60) {
-            detik = 0;
-            menit++;
-          }
-        }
-        Serial.print(menit);
-        Serial.print("-");
-        Serial.print(detik);
-        Serial.print("-");
-        Serial.print(milidetik);
-        Serial.print("-");
-        millisSebelum = millis();
-      }
-    } else if (bendera == 2) {
-      Serial.print(menit);
-      Serial.print("-");
-      Serial.print(detik);
-      Serial.print("-");
-      Serial.print(milidetik);
-      Serial.print("-");
-      millisSebelum = millis();
-      vTaskDelay(5000 / portTICK_PERIOD_MS);
-      bendera = 0;
-    }
+    //Serial.println(11);
+    Serial.println("tugas1");
+    digitalWrite(4, HIGH);   // turn the LED on (HIGH is the voltage level)
+    vTaskDelay( 500 / portTICK_PERIOD_MS ); // wait for one second
+    digitalWrite(4, LOW);    // turn the LED off by making the voltage LOW
+    vTaskDelay( 500 / portTICK_PERIOD_MS ); // wait for one second
   }
 }
 
-void TaskBlink1(void*pvParameters)
+
+void TaskBlink(void *pvParameters)  // This is a task.
 {
-  //====PinMode====
-  pinMode(coneI1, INPUT);
-  pinMode(coneO1, OUTPUT);
-  pinMode(coneI2, INPUT);
-  pinMode(coneO2, OUTPUT);
-  while (1)
+  (void) pvParameters;
+  pinMode(6, OUTPUT);
+  for (;;) // A Task shall never return or exit.
   {
-    digitalWrite(coneO1, HIGH);
-    digitalWrite(coneO2, HIGH);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    digitalWrite(coneO1, LOW);
-    digitalWrite(coneO2, LOW);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    //Serial.println(11);
+    Serial.println("tugas2");
+    digitalWrite(6, HIGH);   // turn the LED on (HIGH is the voltage level)
+    vTaskDelay( 1000 / portTICK_PERIOD_MS ); // wait for one second
+    digitalWrite(6, LOW);    // turn the LED off by making the voltage LOW
+    vTaskDelay( 1000 / portTICK_PERIOD_MS ); // wait for one second
   }
 }
-/*
-void TaskBlink3(void*pvParameters)
-{
-  pinMode(LED3, OUTPUT); //setiap 1 detik
-  while (1) {
-    digitalWrite(LED3, HIGH);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-    digitalWrite(LED3, LOW);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-  }
-}
-void Taskprint(void*pvParameters)
-{
-  int counter = 0;
-  while (1)
-  {
-    counter++;
-    lcd.setCursor(0, 0);
-    lcd.print("counter=");
-    lcd.setCursor(9, 0);
-    lcd.print(counter);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    lcd.clear();
-  }
-}
-void Taskpotensio(void*pvParameters)
-{
-  pinMode(A1, INPUT);
-  while (1) {
-    int i = map(analogRead(A1), 0, 1023, 0, 100);
-    lcd.setCursor(0, 1);
-    lcd.print("nilai_pot=");
-    lcd.setCursor(10, 1);
-    lcd.print(int(i));
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-  }
-}
-*/
