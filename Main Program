@@ -13,11 +13,7 @@ int bendera = 0; //bendera for stopwatch debounce
 int state = 0;
 
 //BREAK MOVEMENT CONE
-int break1 = 0; int break2 = 0; int break3 = 0; int break4 = 0; int break5 = 0;
-
-//komunikasi
-int flag = 0;
-int urutan [10];
+int break1 = 0; int break2 = 0; int break3 = 0; int break4 = 0; int break5 = 0; int break7 = 0;
 
 //===PENDEFINISIAN PIN IO====
 
@@ -65,49 +61,11 @@ void loop() {
   sekarang = millis();
   if (sekarang - sebelum <= 50) {
     if (Serial1.available()) {
-     state = Serial1.read();
-      urutan[flag] = state;
-      if (state == 7) {
-        Serial.println("reset");
-        flag = -1;
-        milidetik = 0;
-        detik = 0;
-        menit = 0;
-        Serial1.print(menit);
-        Serial1.print("-");
-        Serial1.print(detik);
-        Serial1.print("-");
-        Serial1.print(milidetik);
-        Serial1.println("-");
-      }
-      flag++;//penambahan flag
-      delay(200);
-      if (flag == 10 || state == 8) {
-        for (int i = 0; i < flag; i++) {
-          Serial.println(urutan[i]);
-          if (urutan[i] == 1) {
-            break1 = 0;
-            state1();
-          } else if (urutan[i] == 2) {
-            break2 = 0;
-            state2();
-          } else if (urutan[i] == 3) {
-            break3 = 0;
-            state3();
-          } else if (urutan[i] == 4) {
-            break4 = 0;
-            state4();
-          } else if (urutan[i] == 5) {
-            break5 = 0;
-            state5();
-            delay(500);
-          }
-        }
-      }
+      state = Serial1.read();
+      Serial.println(state);
     }
   }
 
-  
   if (sekarang - sebelum <= 100) {
     currentState1 = digitalRead(irSensor);
     if (lastState1 == HIGH && currentState1 == LOW) {
@@ -126,25 +84,196 @@ void loop() {
             menit++;
           }
         }
-        Serial.print(menit);
-        Serial.print("-");
-        Serial.print(detik);
-        Serial.print("-");
-        Serial.print(milidetik);
-        Serial.println("-");
+        Serial1.print(menit);
+        Serial1.print("-");
+        Serial1.print(detik);
+        Serial1.print("-");
+        Serial1.print(milidetik);
+        Serial1.println("-");
         millisSebelum = millis();
       }
     } else if (bendera == 2) {
-      Serial.print(menit);
-      Serial.print("-");
-      Serial.print(detik);
-      Serial.print("-");
-      Serial.print(milidetik);
-      Serial.println("-");
+      Serial1.print(menit);
+      Serial1.print("-");
+      Serial1.print(detik);
+      Serial1.print("-");
+      Serial1.print(milidetik);
+      Serial1.println("-");
       millisSebelum = millis();
       delay(5000);
       bendera = 0;
     }
+  } if (sekarang - sebelum <= 100) {
+    if (state == 7) {
+      if (break7 == 0) {
+        Serial.println("reset");
+        milidetik = 0;
+        detik = 0;
+        menit = 0;
+        Serial1.print(menit);
+        Serial1.print("-");
+        Serial1.print(detik);
+        Serial1.print("-");
+        Serial1.print(milidetik);
+        Serial1.println("-");
+        break7 = 1;
+      }
+    }
+    if (state == 1) {
+      state1();
+    } else if (state == 2) {
+      state2();
+    } else if (state == 3) {
+      state3();
+    } else if (state == 4) {
+      state4();
+    } else if (state == 5) {
+      state5();
+    } else if (state == 8) {
+      break1 = 0;
+      break2 = 0;
+      break3 = 0;
+      break4 = 0;
+      break5 = 0;
+      break7 = 0;
+    }
   }
+
   sebelum = sekarang;
+
+}
+
+
+
+//= == == == == == == == == == == == == == == == == == == == == == == == == == == =
+void coneOne() {
+  digitalWrite(coneO1, HIGH);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, LOW);
+}
+void coneTwo() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, HIGH);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, LOW);
+}
+void coneThree() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, HIGH);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, LOW);
+}
+void coneFour() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, HIGH);
+  digitalWrite(coneO5, LOW);
+}
+void coneFive() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, HIGH);
+}
+
+void coneOff() {
+  digitalWrite(coneO1, LOW);
+  digitalWrite(coneO2, LOW);
+  digitalWrite(coneO3, LOW);
+  digitalWrite(coneO4, LOW);
+  digitalWrite(coneO5, LOW);
+}
+void coneOn() {
+  digitalWrite(coneO1, HIGH);
+  digitalWrite(coneO2, HIGH);
+  digitalWrite(coneO3, HIGH);
+  digitalWrite(coneO4, HIGH);
+  digitalWrite(coneO5, HIGH);
+}
+
+void  state1() {
+  if (break1 == 0) {
+    coneOne();
+    if (digitalRead(coneI1) == LOW) {
+      coneOff();
+      break1 = 1;
+      //==================
+      break2 = 0;
+      break3 = 0;
+      break4 = 0;
+      break5 = 0;
+      break7 = 0;
+    }
+  }
+}
+
+void state2() {
+  if (break2 == 0) {
+    coneTwo();
+    if (digitalRead(coneI2) == LOW) {
+      coneOff();
+      break2 = 1;
+//==================
+      break1 = 0;
+      break3 = 0;
+      break4 = 0;
+      break5 = 0;
+      break7 = 0;
+    }
+  }
+}
+
+
+void state3() {
+  if (break3 == 0) {
+    coneThree();
+    if (digitalRead(coneI3) == LOW) {
+      coneOff();
+      break3 = 1;
+//==================
+      break1 = 0;
+      break2 = 0;
+      break4 = 0;
+      break5 = 0;
+      break7 = 0;
+    }
+  }
+}
+
+void state4() {
+  if (break4 == 0) {
+    coneFour();
+    if (digitalRead(coneI4) == LOW) {
+      coneOff();
+      break4 = 1;
+//==================
+      break1 = 0;
+      break2 = 0;
+      break3 = 0;
+      break5 = 0;
+      break7 = 0;
+    }
+  }
+}
+
+void state5() {
+  if (break5 == 0) {
+    coneFive();
+    if (digitalRead(coneI5) == LOW) {
+      coneOff();
+      break5 = 1;
+//==================
+      break1 = 0;
+      break2 = 0;
+      break3 = 0;
+      break4 = 0;
+      break7 = 0;
+    }
+  }
 }
