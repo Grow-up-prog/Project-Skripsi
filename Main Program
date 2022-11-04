@@ -1,6 +1,21 @@
+//====STOPWATCH====
+//variabel nilai millis
+long millisSebelum;
+int milidetik, detik, menit, jam;
+//debounce
+int currentState1 = HIGH;
+int lastState1 = HIGH;
+//sensor stopwatch
+int irSensor = 13;
+int bendera = 0; //bendera for stopwatch debounce
+
+//Bluetooth
+int state = 0;
+
+//MILLIS
 unsigned long sebelum = 0;
 unsigned long sekarang = 0;
-int state = 0;
+
 int i = 0;
 void setup() {
   // put your setup code here, to run once:
@@ -18,9 +33,42 @@ void loop() {
     }
   }
   if (sekarang - sebelum <= 100) {
-    i++;
-    Serial.print("nilai=");
-    Serial.println(i);
+    currentState1 = digitalRead(irSensor);
+    if (lastState1 == HIGH && currentState1 == LOW) {
+      bendera++;
+    }
+    lastState1 = currentState1;
+    if (bendera == 1) {
+      if (millis() >= millisSebelum + 100) {
+        milidetik++;
+        if (milidetik >= 10) {
+          milidetik = 0;
+          detik++;
+
+          if (detik >= 60) {
+            detik = 0;
+            menit++;
+          }
+        }
+        Serial.print(menit);
+        Serial.print("-");
+        Serial.print(detik);
+        Serial.print("-");
+        Serial.print(milidetik);
+        Serial.println("-");
+        millisSebelum = millis();
+      }
+    } else if (bendera == 2) {
+      Serial.print(menit);
+      Serial.print("-");
+      Serial.print(detik);
+      Serial.print("-");
+      Serial.print(milidetik);
+      Serial.println("-");
+      millisSebelum = millis();
+      delay(5000);
+      bendera = 0;
+    }
   }
-  sebelum=sekarang;
+  sebelum = sekarang;
 }
