@@ -13,7 +13,7 @@ int bendera = 0; //bendera for stopwatch debounce
 int state = 0;
 
 //BREAK MOVEMENT CONE
-int break1 = 0; int break2 = 0; int break3 = 0; int break4 = 0; int break5 = 0; int break7 = 0;
+int break1 = 0; int break2 = 0; int break3 = 0; int break4 = 0; int break5 = 0; int break6 = 0; int break7 = 0;
 
 //===PENDEFINISIAN PIN IO====
 
@@ -129,12 +129,15 @@ void loop() {
       state4();
     } else if (state == 5) {
       state5();
+    } else if (state == 6) {
+      
     } else if (state == 8) {
       break1 = 0;
       break2 = 0;
       break3 = 0;
       break4 = 0;
       break5 = 0;
+      break6 = 0;
       break7 = 0;
     }
   }
@@ -208,6 +211,7 @@ void  state1() {
       break3 = 0;
       break4 = 0;
       break5 = 0;
+      break6 = 0;
       break7 = 0;
     }
   }
@@ -219,11 +223,12 @@ void state2() {
     if (digitalRead(coneI2) == LOW) {
       coneOff();
       break2 = 1;
-//==================
+      //==================
       break1 = 0;
       break3 = 0;
       break4 = 0;
       break5 = 0;
+      break6 = 0;
       break7 = 0;
     }
   }
@@ -236,11 +241,12 @@ void state3() {
     if (digitalRead(coneI3) == LOW) {
       coneOff();
       break3 = 1;
-//==================
+      //==================
       break1 = 0;
       break2 = 0;
       break4 = 0;
       break5 = 0;
+      break6 = 0;
       break7 = 0;
     }
   }
@@ -252,11 +258,12 @@ void state4() {
     if (digitalRead(coneI4) == LOW) {
       coneOff();
       break4 = 1;
-//==================
+      //==================
       break1 = 0;
       break2 = 0;
       break3 = 0;
       break5 = 0;
+      break6 = 0;
       break7 = 0;
     }
   }
@@ -268,11 +275,29 @@ void state5() {
     if (digitalRead(coneI5) == LOW) {
       coneOff();
       break5 = 1;
-//==================
+      //==================
       break1 = 0;
       break2 = 0;
       break3 = 0;
       break4 = 0;
+      break6 = 0;
+      break7 = 0;
+    }
+  }
+}
+
+void state6() {
+  if (break6 == 0) {
+    coneOn();
+    if (currentState1 == LOW) {
+      coneOff();
+      break6 = 1;
+      //==================
+      break1 = 0;
+      break2 = 0;
+      break3 = 0;
+      break4 = 0;
+      break5 = 0;
       break7 = 0;
     }
   }
